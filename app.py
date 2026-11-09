@@ -2520,9 +2520,11 @@ def delete_monthly_patients():
         return "Backup failed. Records were not deleted.", 500
 
     return redirect(url_for("patients"))
-    
-if __name__ == "__main__":
 
-    create_tables()
+# Initialize database tables
+create_tables()
+
+
+if __name__ == "__main__":
 
     app.run(debug=os.environ.get("FLASK_DEBUG") == "1")
