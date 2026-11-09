@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Patient History - ClinicIQ</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">+</div>
+
+                <div>
+                    <h2>ClinicIQ</h2>
+                    <span>Patient Management</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <a href="{{ url_for('dashboard') }}" class="nav-link">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('add_patient') }}" class="nav-link">
+                    New Patient
+                </a>
+
+                <a href="{{ url_for('patients') }}" class="nav-link active">
+                    View Patients
+                </a>
+
+            </nav>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="page-header">
+                <div>
+                    <h1>Patient History</h1>
+                    <p class="page-subtitle">
+                        Patient information and previous visit records.
+                    </p>
+                </div>
+
+                <a href="{{ url_for('patients') }}" class="primary-button">
+                    Back to Patients
+                </a>
+            </header>
+
+            <!-- Patient Details -->
+            <section class="panel history-patient-panel">
+
+                <div class="panel-heading">
+                    <h2>Patient Details</h2>
+                </div>
+
+                <div class="patient-details-grid">
+
+                    <div class="detail-item">
+                        <span>Patient Name</span>
+                        <strong>{{ patient.name }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Patient ID</span>
+                        <strong>{{ patient.id }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Age</span>
+                        <strong>{{ patient.age }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Gender</span>
+                        <strong>{{ patient.gender }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Phone</span>
+                        <strong>{{ patient.phone or "N/A" }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Address</span>
+                        <strong>{{ patient.address or "N/A" }}</strong>
+                    </div>
+
+                </div>
+
+                <!-- Edit Patient Button -->
+                <div class="form-actions">
+                    <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" class="primary-button">
+                        Edit Patient Details
+                    </a>
+                </div>
+
+            </section>
+
+            <!-- Visit History -->
+            <section class="panel history-panel">
+
+                <div class="history-heading">
+
+                    <div class="panel-heading">
+                        <h2>Visit History</h2>
+                        <p>Complete medical visit records.</p>
+                    </div>
+
+                    <a href="{{ url_for('add_visit', patient_id=patient.id) }}" class="primary-button">
+                        + Add New Visit
+                    </a>
+
+                </div>
+
+                {% if visits %}
+
+                <div class="table-container">
+
+                    <table class="history-table">
+
+                        <thead>
+                            <tr>
+                                <th>Visit Date</th>
+                                <th>Visit Time</th>
+                                <th>Patient Type</th>
+                                <th>Problem</th>
+                                <th>Treatment</th>
+                                <th>Doctor Fees</th>
+                                <th>Medicine Charges</th>
+                                <th>Total Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for visit in visits %}
+
+                            <tr>
+
+                                <td>{{ visit.visit_date }}</td>
+
+                                <td>{{ visit.visit_time or "—" }}</td>
+
+                                <td>{{ visit.patient_type }}</td>
+
+                                <td>{{ visit.problem or "—" }}</td>
+
+                                <td>{{ visit.treatment or "—" }}</td>
+
+                                <td>
+                                    ₹{{ "%.2f"|format(visit.doctor_fees) }}
+                                </td>
+
+                                <td>
+                                    ₹{{ "%.2f"|format(visit.medicine_charges) }}
+                                </td>
+
+                                <td class="total-amount">
+                                    ₹{{ "%.2f"|format(visit.doctor_fees + visit.medicine_charges) }}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('edit_visit', visit_id=visit.id) }}" class="history-button">
+                                        Edit
+                                    </a>
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-state">
+                    <h3>No Visit History Found</h3>
+                    <p>This patient does not have any visit records yet.</p>
+
+                    <a href="{{ url_for('add_visit', patient_id=patient.id) }}" class="primary-button">
+                        Add First Visit
+                    </a>
+                </div>
+
+                {% endif %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

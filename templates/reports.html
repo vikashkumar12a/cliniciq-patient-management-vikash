@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Collection Reports - ClinicIQ</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">+</div>
+                <div>
+                    <h2>ClinicIQ</h2>
+                    <span>Patient Management</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <a href="{{ url_for('dashboard') }}" class="nav-link">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('add_patient') }}" class="nav-link">
+                    New Patient
+                </a>
+
+                <a href="{{ url_for('patients') }}" class="nav-link">
+                    View Patients
+                </a>
+
+                <a href="{{ url_for('reports') }}" class="nav-link active">
+                    Collection Reports
+                </a>
+
+            </nav>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="page-header">
+                <div>
+                    <h1>Collection Reports</h1>
+                    <p class="page-subtitle">
+                        View and analyze your clinic's collection records.
+                    </p>
+                </div>
+            </header>
+
+            <!-- Report Filter -->
+            <section class="panel reports-filter-panel">
+
+                <h2>Filter Reports</h2>
+
+                <form method="GET" action="{{ url_for('reports') }}" class="reports-filter-form">
+
+                    <div class="form-group">
+
+                        <label>Report Type</label>
+
+                        <select name="period">
+                            <option value="daily" {% if report_type=='daily' %}selected{% endif %}>
+                                Daily
+                            </option>
+
+                            <option value="weekly" {% if report_type=='weekly' %}selected{% endif %}>
+                                Weekly
+                            </option>
+
+                            <option value="monthly" {% if report_type=='monthly' %}selected{% endif %}>
+                                Monthly
+                            </option>
+                        </select>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>Select Date</label>
+
+                        <input type="date" name="report_date" value="{{ selected_date }}" required>
+
+                    </div>
+
+                    <button type="submit" class="primary-button">
+                        Generate Report
+                    </button>
+
+                </form>
+                <a href="{{ url_for('download_reports', period=report_type, report_date=selected_date) }}"
+                    class="download-report-button">
+                    Download CSV
+                </a>
+
+                <p class="report-period">
+                    Report Period: {{ start_date }} to {{ end_date }}
+                </p>
+
+            </section>
+
+            <!-- Collection Summary -->
+            <section class="reports-summary">
+
+                <div class="report-card">
+                    <span>Total Visits</span>
+                    <h2>{{ summary["total_visits"] }}</h2>
+                </div>
+
+                <div class="report-card">
+                    <span>Doctor Fees</span>
+                    <h2>₹{{ "%.2f"|format(summary["doctor_fees"]) }}</h2>
+                </div>
+
+                <div class="report-card">
+                    <span>Medicine Charges</span>
+                    <h2>₹{{ "%.2f"|format(summary["medicine_charges"]) }}</h2>
+                </div>
+
+                <div class="report-card total-report-card">
+                    <span>Total Collection</span>
+                    <h2>₹{{ "%.2f"|format(total_collection) }}</h2>
+                </div>
+
+            </section>
+
+            <!-- Date-wise Collection Table -->
+            <section class="panel reports-table-panel">
+
+                <div class="panel-heading">
+                    <h2>Date-wise Collection Details</h2>
+                    <p>Collection records for the selected period.</p>
+                </div>
+
+                <div class="table-container">
+
+                    <table class="patients-table">
+
+                        <thead>
+                            <tr>
+                                <th>Visit Date</th>
+                                <th>Total Visits</th>
+                                <th>Doctor Fees</th>
+                                <th>Medicine Charges</th>
+                                <th>Total Collection</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for report in daily_reports %}
+
+                            <tr>
+
+                                <td>{{ report["visit_date"] }}</td>
+
+                                <td>{{ report["total_visits"] }}</td>
+
+                                <td>
+                                    ₹{{ "%.2f"|format(report["doctor_fees"]) }}
+                                </td>
+
+                                <td>
+                                    ₹{{ "%.2f"|format(report["medicine_charges"]) }}
+                                </td>
+
+                                <td class="total-amount">
+                                    ₹{{ "%.2f"|format(
+                                    report["doctor_fees"] +
+                                    report["medicine_charges"]
+                                    ) }}
+                                </td>
+
+                            </tr>
+
+                            {% else %}
+
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    No collection records found for this period.
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

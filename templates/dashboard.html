@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ClinicIQ</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">+</div>
+                <div>
+                    <h2>ClinicIQ</h2>
+                    <span>Patient Management</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a class="nav-link active" href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a class="nav-link" href="{{ url_for('add_patient') }}">New Patient</a>
+                <a class="nav-link" href="{{ url_for('patients') }}">View Patients</a>
+                <a class="nav-link" href="#collection-reports">Collection Reports</a>
+                <a class="nav-link" href="#quick-actions">Quick Actions</a>
+            </nav>
+
+            <a class="logout-link" href="{{ url_for('logout') }}">Logout</a>
+        </aside>
+
+        <main class="main-content">
+
+            <header class="page-header">
+                <div>
+                    <p class="eyebrow">OVERVIEW</p>
+                    <h1>Dashboard</h1>
+                    <p class="page-subtitle">Welcome to your ClinicIQ overview.</p>
+                </div>
+                <a class="primary-button" href="{{ url_for('add_patient') }}">+ Add New Patient</a>
+            </header>
+
+            <section class="stats-grid">
+                <article class="stat-card">
+                    <p>Total Patients</p>
+                    <h2>{{ total_patients }}</h2>
+                    <span>Registered patients</span>
+                </article>
+
+                <article class="stat-card">
+                    <p>Total Visits</p>
+                    <h2>{{ total_visits }}</h2>
+                    <span>All recorded visits</span>
+                </article>
+
+                <article class="stat-card">
+                    <p>Today's Patients</p>
+                    <h2>{{ today_patients }}</h2>
+                    <span>Patients seen today</span>
+                </article>
+
+                <article class="stat-card">
+                    <p>Total Collection</p>
+                    <h2>₹{{ "%.2f"|format(total_collection) }}</h2>
+                    <span>Doctor fees + medicine</span>
+                </article>
+            </section>
+
+            <section class="stats-grid secondary-stats">
+                <article class="mini-stat-card">
+                    <span>This Week's Patients</span>
+                    <strong>{{ weekly_patients }}</strong>
+                </article>
+                <article class="mini-stat-card">
+                    <span>This Month's Patients</span>
+                    <strong>{{ monthly_patients }}</strong>
+                </article>
+                <article class="mini-stat-card">
+                    <span>Total Doctor Fees</span>
+                    <strong>₹{{ "%.2f"|format(doctor_fees) }}</strong>
+                </article>
+                <article class="mini-stat-card">
+                    <span>Total Medicine Charges</span>
+                    <strong>₹{{ "%.2f"|format(medicine_charges) }}</strong>
+                </article>
+            </section>
+
+            <section class="charts-grid">
+                <article class="panel chart-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Patient Visits</h2>
+                            <p>Visit activity over the last 7 days</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="visitsChart"></canvas>
+                    </div>
+                </article>
+
+                <article class="panel chart-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Patient Categories</h2>
+                            <p>Visits by patient type</p>
+                        </div>
+                    </div>
+                    <div class="chart-container doughnut-container">
+                        <canvas id="patientTypesChart"></canvas>
+                    </div>
+                </article>
+
+                <article class="panel chart-panel collection-chart-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Collection Analysis</h2>
+                            <p>Doctor fees compared with medicine charges</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="collectionChart"></canvas>
+                    </div>
+                </article>
+            </section>
+
+            <section class="panel collection-summary" id="collection-reports">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Collection Reports</h2>
+                        <p>Review collections for different time periods.</p>
+                    </div>
+                </div>
+
+                <div class="period-buttons">
+                    <button type="button" class="period-button active" onclick="showCollection('daily', this)">Daily</button>
+                    <button type="button" class="period-button" onclick="showCollection('weekly', this)">Weekly</button>
+                    <button type="button" class="period-button" onclick="showCollection('monthly', this)">Monthly</button>
+                </div>
+
+                <div id="daily" class="period-content">
+                    <h3>Today's Collection</h3>
+                    <div class="collection-values">
+                        <p>Doctor Fees <strong>₹{{ "%.2f"|format(daily_doctor_fees) }}</strong></p>
+                        <p>Medicine Charges <strong>₹{{ "%.2f"|format(daily_medicine_charges) }}</strong></p>
+                    </div>
+                </div>
+
+                <div id="weekly" class="period-content" hidden>
+                    <h3>This Week's Collection</h3>
+                    <div class="collection-values">
+                        <p>Doctor Fees <strong>₹{{ "%.2f"|format(weekly_doctor_fees) }}</strong></p>
+                        <p>Medicine Charges <strong>₹{{ "%.2f"|format(weekly_medicine_charges) }}</strong></p>
+                    </div>
+                </div>
+
+                <div id="monthly" class="period-content" hidden>
+                    <h3>This Month's Collection</h3>
+                    <div class="collection-values">
+                        <p>Doctor Fees <strong>₹{{ "%.2f"|format(monthly_doctor_fees) }}</strong></p>
+                        <p>Medicine Charges <strong>₹{{ "%.2f"|format(monthly_medicine_charges) }}</strong></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel date-report" id="date-wise-collection">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Date-wise Collection</h2>
+                        <p>Select any date to view its collection details.</p>
+                    </div>
+                </div>
+
+                <form class="date-form" method="GET" action="{{ url_for('dashboard') }}#date-wise-collection">
+                    <div>
+                        <label for="report_date">Select Date</label>
+                        <input type="date" id="report_date" name="report_date" value="{{ selected_date }}" required>
+                    </div>
+                    <button class="primary-button" type="submit">Check Collection</button>
+                </form>
+
+                <div class="date-result">
+                    <h3>Collection for {{ selected_date }}</h3>
+                    <div class="collection-values">
+                        <p>Doctor Fees <strong>₹{{ "%.2f"|format(date_collection.doctor_fees) }}</strong></p>
+                        <p>Medicine Charges <strong>₹{{ "%.2f"|format(date_collection.medicine_charges) }}</strong></p>
+                        <p>Total Collection
+                            <strong>₹{{ "%.2f"|format(date_collection.doctor_fees + date_collection.medicine_charges) }}</strong>
+                        </p>
+                        <p>Total Visits <strong>{{ date_collection.total_visits }}</strong></p>
+                    </div>
+
+                    {% if date_collection.total_visits == 0 %}
+                        <p class="empty-message">No collection records found for this date.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="panel quick-actions" id="quick-actions">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Quick Actions</h2>
+                        <p>Frequently used clinic tools.</p>
+                    </div>
+                </div>
+
+                <div class="action-grid">
+                    <a class="action-link" href="{{ url_for('add_patient') }}">Add New Patient</a>
+                    <a class="action-link" href="{{ url_for('patients') }}">View All Patients</a>
+                    <a class="action-link" href="{{ url_for('download_patients') }}">Download Patient Records (CSV)</a>
+                    <a class="action-link" href="{{ url_for('download_backup') }}">Download Database Backup (.db)</a>
+                    <a class="action-link" href="{{ url_for('restore_database') }}">Restore Database</a>
+                </div>
+            </section>
+
+            <footer class="page-footer">ClinicIQ · Patient Management System</footer>
+
+        </main>
+    </div>
+
+    <script>
+        function showCollection(period, button) {
+            document.querySelectorAll(".period-content").forEach(function (section) {
+                section.hidden = true;
+            });
+
+            document.getElementById(period).hidden = false;
+
+            document.querySelectorAll(".period-button").forEach(function (item) {
+                item.classList.remove("active");
+            });
+
+            button.classList.add("active");
+        }
+
+        const visitLabels = {{ visit_chart_labels | tojson }};
+        const visitValues = {{ visit_chart_values | tojson }};
+        const patientTypeLabels = {{ patient_type_labels | tojson }};
+        const patientTypeValues = {{ patient_type_values | tojson }};
+        const collectionLabels = {{ collection_chart_labels | tojson }};
+        const collectionValues = {{ collection_chart_values | tojson }};
+
+        new Chart(document.getElementById("visitsChart"), {
+            type: "line",
+            data: {
+                labels: visitLabels,
+                datasets: [{
+                    label: "Patient Visits",
+                    data: visitValues,
+                    borderWidth: 3,
+                    tension: 0.35,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+
+        new Chart(document.getElementById("patientTypesChart"), {
+            type: "doughnut",
+            data: {
+                labels: patientTypeLabels,
+                datasets: [{
+                    data: patientTypeValues,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: "bottom" } }
+            }
+        });
+
+        new Chart(document.getElementById("collectionChart"), {
+            type: "bar",
+            data: {
+                labels: collectionLabels,
+                datasets: [{
+                    label: "Amount (₹)",
+                    data: collectionValues,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+
+</body>
+</html>

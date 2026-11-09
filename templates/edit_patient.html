@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Patient - ClinicIQ</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">+</div>
+
+                <div>
+                    <h2>ClinicIQ</h2>
+                    <span>Patient Management</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <a href="{{ url_for('dashboard') }}" class="nav-link">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('add_patient') }}" class="nav-link">
+                    New Patient
+                </a>
+
+                <a href="{{ url_for('patients') }}" class="nav-link active">
+                    View Patients
+                </a>
+
+            </nav>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="page-header">
+
+                <div>
+                    <h1>Edit Patient Details</h1>
+
+                    <p class="page-subtitle">
+                        Update patient information.
+                    </p>
+                </div>
+
+            </header>
+
+            <section class="panel patient-form">
+
+                <div class="panel-heading">
+                    <h2>Patient Information</h2>
+                    <p>Patient ID: {{ patient.id }}</p>
+                </div>
+
+                {% if error %}
+
+                <div class="error-message">
+                    {{ error }}
+                </div>
+
+                {% endif %}
+
+                <form method="POST">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label>Patient Name *</label>
+
+                            <input
+                                type="text"
+                                name="name"
+                                value="{{ patient.name }}"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Age *</label>
+
+                            <input
+                                type="number"
+                                name="age"
+                                min="1"
+                                max="120"
+                                value="{{ patient.age }}"
+                                required
+                            >
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Gender *</label>
+
+                            <select name="gender" required>
+
+                                <option value="Male"
+                                    {% if patient.gender == 'Male' %}selected{% endif %}>
+                                    Male
+                                </option>
+
+                                <option value="Female"
+                                    {% if patient.gender == 'Female' %}selected{% endif %}>
+                                    Female
+                                </option>
+
+                                <option value="Other"
+                                    {% if patient.gender == 'Other' %}selected{% endif %}>
+                                    Other
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label>Phone Number</label>
+
+                            <input
+                                type="tel"
+                                name="phone"
+                                value="{{ patient.phone or '' }}"
+                            >
+
+                        </div>
+
+                        <div class="form-group full-width">
+
+                            <label>Address</label>
+
+                            <textarea
+                                name="address"
+                                rows="4"
+                            >{{ patient.address or '' }}</textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
+
+                        <button type="submit" class="primary-button">
+                            Update Patient
+                        </button>
+
+                        <a
+                            href="{{ url_for('patient_history', patient_id=patient.id) }}"
+                            class="secondary-button"
+                        >
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

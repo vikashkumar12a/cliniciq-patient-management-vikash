@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Visit - ClinicIQ</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">+</div>
+
+                <div>
+                    <h2>ClinicIQ</h2>
+                    <span>Patient Management</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <a href="{{ url_for('dashboard') }}" class="nav-link">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('add_patient') }}" class="nav-link">
+                    New Patient
+                </a>
+
+                <a href="{{ url_for('patients') }}" class="nav-link active">
+                    View Patients
+                </a>
+
+            </nav>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="page-header">
+                <div>
+                    <h1>Edit Visit</h1>
+                    <p class="page-subtitle">
+                        Update existing patient visit details.
+                    </p>
+                </div>
+
+                <a href="{{ url_for('patient_history', patient_id=patient.id) }}" class="secondary-button">
+                    Back to History
+                </a>
+            </header>
+
+            <!-- Patient Information -->
+            <section class="panel visit-patient-info">
+
+                <h2>Patient Information</h2>
+
+                <div class="patient-details-grid">
+
+                    <div class="detail-item">
+                        <span>Patient Name</span>
+                        <strong>{{ patient.name }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Patient ID</span>
+                        <strong>{{ patient.id }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Visit Date</span>
+                        <strong>{{ visit.visit_date }}</strong>
+                    </div>
+
+                    <div class="detail-item">
+                        <span>Visit Time</span>
+                        <strong>{{ visit.visit_time or "—" }}</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <!-- Edit Visit Form -->
+            <section class="panel patient-form form-section">
+
+                <div class="panel-heading">
+                    <h2>Visit Details</h2>
+                    <p>Update the information below.</p>
+                </div>
+
+                {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label for="patient_type">Patient Type *</label>
+
+                            <select id="patient_type" name="patient_type" required>
+
+                                <option value="Normal" {% if visit.patient_type=="Normal" %}selected{% endif %}>
+                                    Normal
+                                </option>
+
+                                <option value="Ear" {% if visit.patient_type=="Ear" %}selected{% endif %}>
+                                    Ear
+                                </option>
+
+                                <option value="Dental" {% if visit.patient_type=="Dental" %}selected{% endif %}>
+                                    Dental
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="doctor_fees">Doctor Fees (₹)</label>
+                            <div class="form-group">
+                                <label for="doctor_fees">Doctor Fees (₹)</label>
+
+                                <input type="number" id="doctor_fees" name="doctor_fees" min="0" step="0.01"
+                                    value="{{ visit.doctor_fees }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="medicine_charges">Medicine Charges (₹)</label>
+
+                                <input type="number" id="medicine_charges" name="medicine_charges" min="0" step="0.01"
+                                    value="{{ visit.medicine_charges }}" required>
+                            </div>
+                            <input type="number" id="doctor_fees" name="doctor_fees" min="0" step="0.01"
+                                value="{{ visit.doctor_fees }}" required>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="problem">Problem</label>
+
+                            <textarea id="problem" name="problem" rows="4">{{ visit.problem or "" }}</textarea>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="treatment">Treatment</label>
+
+                            <textarea id="treatment" name="treatment" rows="4">{{ visit.treatment or "" }}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="medicine_charges">Medicine Charges (₹)</label>
+
+                            <input type="number" id="medicine_charges" name="medicine_charges" min="0" step="0.01"
+                                value="{{ visit.medicine_charges }}" required>
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
+
+                        <button type="submit" class="primary-button">
+                            Update Visit
+                        </button>
+
+                        <a href="{{ url_for('patient_history', patient_id=patient.id) }}" class="secondary-button">
+                            Cancel
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>All Patients - ClinicIQ</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">+</div>
+
+                <div>
+                    <h2>ClinicIQ</h2>
+                    <span>Patient Management</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <a href="{{ url_for('dashboard') }}" class="nav-link">
+                    Dashboard
+                </a>
+
+                <a href="{{ url_for('add_patient') }}" class="nav-link">
+                    New Patient
+                </a>
+
+                <a href="{{ url_for('patients') }}" class="nav-link active">
+                    View Patients
+                </a>
+
+            </nav>
+
+            <a href="{{ url_for('logout') }}" class="logout-link">
+                Logout
+            </a>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <header class="page-header">
+
+                <div>
+                    <h1>Registered Patients</h1>
+
+                    <p class="page-subtitle">
+                        View all registered patient records.
+                    </p>
+                </div>
+
+                <a href="{{ url_for('add_patient') }}" class="primary-button">
+                    + Add New Patient
+                </a>
+
+            </header>
+
+            <section class="panel patients-panel">
+
+                <div class="panel-heading">
+                    <h2>All Patients</h2>
+                    <p>Patient information and medical history.</p>
+                </div>
+
+                <!-- Patient Search -->
+                <div class="patient-search">
+
+                    <form
+                        method="GET"
+                        action="{{ url_for('patients') }}"
+                        id="patientSearchForm"
+                    >
+
+                        <input
+                            type="text"
+                            id="patientSearchInput"
+                            name="search"
+                            placeholder="Search by Patient Name, ID or Phone..."
+                            value="{{ search }}"
+                        >
+
+                        <button type="submit">
+                            Search
+                        </button>
+
+                        {% if search %}
+
+                        <a href="{{ url_for('patients') }}">
+                            Clear
+                        </a>
+
+                        {% endif %}
+
+                    </form>
+
+                </div>
+
+                {% if patients %}
+
+                <div class="table-container">
+
+                    <table class="patients-table">
+
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Address</th>
+                                <th>Phone</th>
+                                <th>History</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for patient in patients %}
+
+                            <tr>
+
+                                <td>{{ patient.id }}</td>
+
+                                <td class="patient-name">
+                                    {{ patient.name }}
+                                </td>
+
+                                <td>{{ patient.age }}</td>
+
+                                <td>{{ patient.gender }}</td>
+
+                                <td>{{ patient.address or 'N/A' }}</td>
+
+                                <td>{{ patient.phone or 'N/A' }}</td>
+
+                                <td>
+
+                                    <a
+                                        href="{{ url_for('patient_history', patient_id=patient.id) }}"
+                                        class="history-button"
+                                    >
+                                        View History
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                {% else %}
+
+                <div class="empty-state">
+
+                    {% if search %}
+
+                    <h3>No Matching Patients Found</h3>
+
+                    <p>
+                        No patient records match your search:
+                        "{{ search }}"
+                    </p>
+
+                    <a href="{{ url_for('patients') }}" class="primary-button">
+                        Clear Search
+                    </a>
+
+                    {% else %}
+
+                    <h3>No Patients Found</h3>
+
+                    <p>
+                        There are currently no registered patients.
+                    </p>
+
+                    <a href="{{ url_for('add_patient') }}" class="primary-button">
+                        Add First Patient
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+                {% endif %}
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- Keep Search Box Focused After Search -->
+    <script>
+
+        window.addEventListener("load", function () {
+
+            const searchInput = document.getElementById("patientSearchInput");
+
+            if (searchInput && searchInput.value.trim() !== "") {
+
+                searchInput.focus();
+
+                const length = searchInput.value.length;
+
+                searchInput.setSelectionRange(length, length);
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
