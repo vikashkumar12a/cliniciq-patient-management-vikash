@@ -77,19 +77,10 @@
                 <!-- Patient Search -->
                 <div class="patient-search">
 
-                    <form
-                        method="GET"
-                        action="{{ url_for('patients') }}"
-                        id="patientSearchForm"
-                    >
+                    <form method="GET" action="{{ url_for('patients') }}" id="patientSearchForm">
 
-                        <input
-                            type="text"
-                            id="patientSearchInput"
-                            name="search"
-                            placeholder="Search by Patient Name, ID or Phone..."
-                            value="{{ search }}"
-                        >
+                        <input type="text" id="patientSearchInput" name="search"
+                            placeholder="Search by Patient Name, ID or Phone..." value="{{ search }}">
 
                         <button type="submit">
                             Search
@@ -102,6 +93,26 @@
                         </a>
 
                         {% endif %}
+
+                    </form>
+
+                </div>
+
+                <!-- Monthly Patient Delete -->
+                <div class="patient-search" style="margin-top: 20px;">
+
+                    <h3>Delete Monthly Records</h3>
+
+                    <p>Select a month to delete its patient visit records.</p>
+
+                    <form method="POST" action="{{ url_for('delete_monthly_patients') }}"
+                        onsubmit="return confirm('Are you sure? All visits in the selected month will be deleted. Patients with visits in other months will remain.');">
+
+                        <input type="month" name="month" required>
+
+                        <button type="submit">
+                            Delete Monthly Records
+                        </button>
 
                     </form>
 
@@ -122,6 +133,7 @@
                                 <th>Address</th>
                                 <th>Phone</th>
                                 <th>History</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
 
@@ -145,14 +157,27 @@
 
                                 <td>{{ patient.phone or 'N/A' }}</td>
 
+                                <!-- Patient History -->
                                 <td>
 
-                                    <a
-                                        href="{{ url_for('patient_history', patient_id=patient.id) }}"
-                                        class="history-button"
-                                    >
+                                    <a href="{{ url_for('patient_history', patient_id=patient.id) }}"
+                                        class="history-button">
                                         View History
                                     </a>
+
+                                </td>
+
+                                <!-- Delete Patient -->
+                                <td>
+
+                                    <form method="POST" action="{{ url_for('delete_patient', patient_id=patient.id) }}"
+                                        onsubmit="return confirm('Are you sure you want to delete this patient and their complete visit history?');">
+
+                                        <button type="submit" class="delete-button">
+                                            Delete
+                                        </button>
+
+                                    </form>
 
                                 </td>
 
