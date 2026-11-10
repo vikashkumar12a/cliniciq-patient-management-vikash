@@ -126,19 +126,27 @@ def create_tables():
 
         if admin_username and admin_password:
 
-            existing_admin = conn.execute("""
-                SELECT id FROM admins
-                WHERE username = ?
-            """, (admin_username,)).fetchone()
+    password_hash = generate_password_hash(admin_password)
 
-            if existing_admin is None:
+    existing_admin = conn.execute("""
+        SELECT id FROM admins
+        WHERE username = ?
+    """, (admin_username,)).fetchone()
 
-                password_hash = generate_password_hash(admin_password)
+    if existing_admin:
 
-                conn.execute("""
-                    INSERT INTO admins (username, password_hash)
-                    VALUES (?, ?)
-                """, (admin_username, password_hash))
+        conn.execute("""
+            UPDATE admins
+            SET password_hash = ?
+            WHERE username = ?
+        """, (password_hash, admin_username))
+
+    else:
+
+        conn.execute("""
+            INSERT INTO admins (username, password_hash)
+            VALUES (?, ?)
+        """, (admin_username, password_hash))
 
         conn.commit()
 
