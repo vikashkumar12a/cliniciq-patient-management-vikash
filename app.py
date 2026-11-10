@@ -124,30 +124,33 @@ def create_tables():
         admin_username = os.environ.get("CLINICIQ_ADMIN_USERNAME", "").strip()
         admin_password = os.environ.get("CLINICIQ_ADMIN_PASSWORD", "")
 
+           # Create Render Admin from Environment Variables
+        admin_username = os.environ.get("CLINICIQ_ADMIN_USERNAME", "").strip()
+        admin_password = os.environ.get("CLINICIQ_ADMIN_PASSWORD", "")
+
         if admin_username and admin_password:
 
-    password_hash = generate_password_hash(admin_password)
+            password_hash = generate_password_hash(admin_password)
 
-    existing_admin = conn.execute("""
-        SELECT id FROM admins
-        WHERE username = ?
-    """, (admin_username,)).fetchone()
+            existing_admin = conn.execute("""
+                SELECT id FROM admins
+                WHERE username = ?
+            """, (admin_username,)).fetchone()
 
-    if existing_admin:
+            if existing_admin:
 
-        conn.execute("""
-            UPDATE admins
-            SET password_hash = ?
-            WHERE username = ?
-        """, (password_hash, admin_username))
+                conn.execute("""
+                    UPDATE admins
+                    SET password_hash = ?
+                    WHERE username = ?
+                """, (password_hash, admin_username))
 
-    else:
+            else:
 
-        conn.execute("""
-            INSERT INTO admins (username, password_hash)
-            VALUES (?, ?)
-        """, (admin_username, password_hash))
-
+                conn.execute("""
+                    INSERT INTO admins (username, password_hash)
+                    VALUES (?, ?)
+                """, (admin_username, password_hash))
         conn.commit()
 
     except Exception:
