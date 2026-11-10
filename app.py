@@ -69,57 +69,85 @@ def create_tables():
 
     conn = get_db_connection()
 
-    # Patients Table
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS patients (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            age INTEGER NOT NULL,
-            gender TEXT NOT NULL,
-            address TEXT,
-            phone TEXT
-        )
-    """)
-
-    # Patient Visits Table
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS visits (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            patient_id INTEGER NOT NULL,
-            patient_type TEXT NOT NULL,
-            problem TEXT,
-            treatment TEXT,
-            visit_date TEXT NOT NULL,
-            doctor_fees REAL DEFAULT 0,
-            medicine_charges REAL DEFAULT 0,
-
-            FOREIGN KEY (patient_id)
-            REFERENCES patients(id)
-        )
-    """)
-        # Add visit_time column if it does not exist
-    columns = conn.execute("PRAGMA table_info(visits)").fetchall()
-
-    column_names = [column["name"] for column in columns]
-
-    if "visit_time" not in column_names:
+    try:
+        # Patients Table
         conn.execute("""
-            ALTER TABLE visits
-            ADD COLUMN visit_time TEXT
+            CREATE TABLE IF NOT EXISTS patients (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                age INTEGER NOT NULL,
+                gender TEXT NOT NULL,
+                address TEXT,
+                phone TEXT
+            )
         """)
 
-        # Admin Table
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS admins (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+        # Patient Visits Table
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS visits (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                patient_id INTEGER NOT NULL,
+                patient_type TEXT NOT NULL,
+                problem TEXT,
+                treatment TEXT,
+                visit_date TEXT NOT NULL,
+                doctor_fees REAL DEFAULT 0,
+                medicine_charges REAL DEFAULT 0,
+                FOREIGN KEY (patient_id) REFERENCES patients(id)
+            )
+        """)
 
-    conn.commit()
-    conn.close()
+        # Add visit_time column if it does not exist
+        columns = conn.execute(
+            "PRAGMA table_info(visits)"
+        ).fetchall()
+
+        column_names = [column["name"] for column in columns]
+
+        if "visit_time" not in column_names:
+            conn.execute("""
+                ALTER TABLE visits
+                ADD COLUMN visit_time TEXT
+            """)
+
+        # Admin Table
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS admins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        # Create Render Admin from Environment Variables
+        admin_username = os.environ.get("CLINICIQ_ADMIN_USERNAME", "").strip()
+        admin_password = os.environ.get("CLINICIQ_ADMIN_PASSWORD", "")
+
+        if admin_username and admin_password:
+
+            existing_admin = conn.execute("""
+                SELECT id FROM admins
+                WHERE username = ?
+            """, (admin_username,)).fetchone()
+
+            if existing_admin is None:
+
+                password_hash = generate_password_hash(admin_password)
+
+                conn.execute("""
+                    INSERT INTO admins (username, password_hash)
+                    VALUES (?, ?)
+                """, (admin_username, password_hash))
+
+        conn.commit()
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
 # Check Admin Session Inactivity
 @app.before_request
 def check_session_timeout():
